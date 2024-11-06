@@ -1,0 +1,15 @@
+[C,c:1]-[C:2](=[O:3])-[O;H0&-,H1:4].[N&H2:21]-[C:22]-[CH2:23]-[O&H1:24]>>[C,c:1]-[C:2]1=[N&H0:21]-[C:22]-[CH2:23]-[O&H0:24]-1
+% [C,c:1]-[C:2](-[C;H1,H2,H3:3])=[O:4].[C,c:21]-[C&H1:22]=[O:23]>>[C,c:1]-[C:2](=[O:4])-[C:3]-[C&H1:22](-[O&H1:23])-[C,c:21] aldol_addition
+% [C,c:1]-[C:2](-[C;H2,H3:3])=[O:4].[C,c:21]-[C&H1:22]=[O:23]>>[C,c:1]-[C:2](=[O:4])-[C:3]=[C:22]-[C,c:21] aldol_condensation
+% [c:1]:[c:2](:[c:3])-[NH2:4]>[CH2:21]=N-[OH]>[c:1]:[c:2](:[c:3])-[CH1]=O borsche_beech_aromald_syn todo: add reagent as well
+% [C:1]-[C:2]#[C:3]-[C:4]-[OH:5]>>[C:1]/[C:2]=[C:3]/[C:4]-[OH:5] chan_red
+% [cH:1]1:[c:2]:[c:3]:[c:4]:[c:5]:[c:6]:1-[NH:7]-[c:8]2:[cH:9]:[c:10]:[c:11]:[c:12]:[c:13]:2>>[c:1]1(-S3):[c:2]:[c:3]:[c:4]:[c:5]:[c:6]:1-[NH:7]-[c:8]2:[c:9]-3:[c:10]:[c:11]:[c:12]:[c:13]:2 bernthsen_thionation
+% [c:1]:[cH:2]:[c:3]-[OH:4].[C,c:21]-[CH:22]=O.[NH2:41]-[$(c*),$(C(=O)c):42]>>[c:1]:[c:2](:[c:3]-[OH:4])-[CH:22](-[C,c:21])-[NH:41]-[C,c:42] betti_reaction
+% 
+% [C,c;!$(*~[O,N]):1]-[CH:2](-[OH:4])-[C,c;!$(*~[O,N]):3]>>[C,c:1]-[C:2](=[O:4])-[C,c:3] alcohol_to_ketone
+% [C,c;!$(*~[O,N]):1]-[CH:2](-[OH])-[C,c;!$(*~[O,N]):3]>>[C,c:1]-[C:2]-[C,c:3] alcohol_to_methylene
+% [C,c;!$(*~[O,N]):1]-[CH2:2](-[OH:3])>>[C,c:1]-[C:2](=[O:3]) alcohol_to_aldehyde
+% [C,c;!$(*~[O,N]):1]-[CH2:2](-[OH:3])>>[C,c:1]-[C:2](=[O:3])-[OH] alcohol_to_acid
+% [C,c:1]-[CH,CH2,$(S(=O)=O),$(C=O):2]-[OH:3]>>[C,c:1]-[C:2]-[N:3]=[N+]=[N-] hydroxyl_to_azide
+
+[C,c:1]-[CH2:2]-[OH:3].[OH,Cl,Br,I,F]-[C:22](=[O:23])-[C,c:24]>>[C,c:1]-[C:2]-[O:3]-[C:22](=[O:23])-[C,c:24] esterification
