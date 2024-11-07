@@ -115,6 +115,7 @@ class CRBBDataset(Dataset):
     def __init__(self, root: str = ".", 
                  rxns: List[CR] = list(), rxn_files: List[str] = list(),
                  bbs: List[BB] = list(), bb_files: List[str] = list(),
+                 ligs: List[BB] = list(), lig_files: List[str] = list(),
                  rxn_featurizer: CRFeaturizer = CRFeaturizer(), 
                  rxn_feats: torch.Tensor | List[Data] = None,
                  bb_featurizer: BBFeaturizer = BBFeaturizer(), 
@@ -144,6 +145,19 @@ class CRBBDataset(Dataset):
                                    feats=rxn_feats,
                                    force_reload=force_reload)
         
+        if len(ligs) == 0 and len(lig_files) == 0:
+            self.ligdataset = self.bbdataset
+        else:
+            print("Creating ligand dataset...")
+            self.ligdataset = BBDataset(root=self.bbd_root,
+                                        bbs=ligs, sdf_files=lig_files,
+                                        featurizer=bb_featurizer,
+                                        feats=bb_feats,
+                                        cfeaturizer=bbconf_featurizer,
+                                        cfeats=bbconf_feats,
+                                        use_confs=True,
+                                        force_reload=force_reload)
+        
         super().__init__(root, force_reload=force_reload)
 
         self.epoch_multiplier = epoch_multiplier
@@ -164,6 +178,10 @@ class CRBBDataset(Dataset):
         return self.bbdataset.bbs
     
     @property
+    def ligs(self) -> List[BB]:
+        return self.ligdataset.bbs
+    
+    @property
     def rxns(self) -> List[CR]:
         return self.crdataset.rxns
     
@@ -174,6 +192,14 @@ class CRBBDataset(Dataset):
     @property
     def bbcfeats(self) -> torch.Tensor | List[Data]:
         return self.bbdataset.cfeats
+    
+    @property
+    def ligfeats(self) -> torch.Tensor | List[Data]:
+        return self.ligdataset.feats
+    
+    @property
+    def ligcfeats(self) -> torch.Tensor | List[Data]:
+        return self.ligdataset.cfeats
     
     @property
     def rxnfeats(self) -> torch.Tensor | List[Data]:
@@ -196,7 +222,7 @@ class CRBBDataset(Dataset):
 
     def process(self):
 
-        print("Matching building blocks and reactions...")
+        print("Matching building blocks (and ligs) and reactions...")
         self.rxnid2bbid = {}
         self.rxnids = []
         for rxn_id, rxn in enumerate(tqdm(self.rxns)):
@@ -227,6 +253,20 @@ class CRBBDataset(Dataset):
             self.bbid2rxnrid[bb_id] = bb_rxn_matches
             self.bbids.append(bb_id)
 
+        self.ligid2rxnrid = {}
+        self.ligids = []
+        for lig_id, lig in enumerate(tqdm(self.ligs)):
+            lig_rxn_matches = [
+                (rxn_id, rid) for rxn_id in self.rxnids
+                for rid in self.rxns[rxn_id].is_reactant(lig)
+            ]
+
+            if len(lig_rxn_matches) == 0:
+                continue
+
+            self.ligid2rxnrid[lig_id] = lig_rxn_matches
+            self.ligids.append(lig_id)
+
         print("Constructing searcher for every rxn reactant...")
         self.rxnid2bbsearchers = {}
         for rxn_id, rid2bbids in tqdm(self.rxnid2bbid.items()):
@@ -254,7 +294,7 @@ class CRBBDataset(Dataset):
         if self.is_pregened:
             return len(self.pregen_data)
         else:
-            return len(self.bbid2rxnrid) * self.epoch_multiplier
+            return len(self.ligid2rxnrid) * self.epoch_multiplier
     
     def get(self, idx):
         if self.is_pregened:
@@ -264,13 +304,13 @@ class CRBBDataset(Dataset):
             return self.generate(idx)
     
     def generate(self, idx):
-        idx = idx % len(self.bbid2rxnrid)
+        idx = idx % len(self.ligid2rxnrid)
 
-        bb_id = self.bbids[idx]
-        rxn_id, rid = self.sample_bbrxn(bb_id)
+        lig_id = self.ligids[idx]
+        rxn_id, rid = self.sample_ligrxn(lig_id)
 
         rs, p = self.sample_rxnresult(rxn_id, 
-                                      l0=self.bbs[bb_id], 
+                                      l0=self.ligs[lig_id], 
                                       l0_rid=rid)
         
         rsfeats = self.bbfeaturizer.featurize(rs, progbar=False, transform_only=True)
@@ -287,8 +327,8 @@ class CRBBDataset(Dataset):
     def encode_rxn(self, rxn_id: int, rs: List[Chem.Mol], p: Chem.Mol):
         return self.rxnfeats[rxn_id]
     
-    def sample_bbrxn(self, bb_id):
-        rxn_id, rid = random.choice(self.bbid2rxnrid[bb_id])
+    def sample_ligrxn(self, lig_id):
+        rxn_id, rid = random.choice(self.ligid2rxnrid[lig_id])
         return rxn_id, rid
     
     def sample_rxnbb(self, rxn_id):

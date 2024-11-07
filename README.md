@@ -8,6 +8,7 @@ Primary model results satisfactory. The next steps:
 - [ ] Discuss potential transfer learning from relevant models
 - [ ] Use of rxnfp or drfp for featurizing reactions (not reaction templates!)
 - [ ] Clean up and push the rest of the code to the repo
+- [ ] Use searchers for dataset to be able to calculate more practical metrics
 
 # Env
 ```bash
