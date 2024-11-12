@@ -1,6 +1,8 @@
 # 3DSynGen
 This is my thesis project and it's super incomplete. It will hopefully be much more documented and things will make more sense some time in the future :D
 
+Note: This project is under heavy development and only the parts that are at least somewhat stable and finalized will be pushed to this public repository.
+
 # TODO
 Primary model results satisfactory. The next steps:
 - [ ] 3D geometry as conditions for the model
